@@ -1,0 +1,170 @@
+
+=== step1_game.py ===
+the world is 400 pixels high, the bird 24, the hole in a pipe 110; a pipe comes every 50 frames
+a tap sets the speed to 8 pixels a frame upward; every frame without a tap adds 1 downward, up to 10
+a game is scored up to 100 pipes; every player below plays the same 100 games
+
+tapping at random
+  a tap in   0% of the frames:  0.00 pipes a game, best game 0
+  a tap in   5% of the frames:  0.05 pipes a game, best game 2
+  a tap in  10% of the frames:  0.08 pipes a game, best game 1
+  a tap in  20% of the frames:  0.02 pipes a game, best game 1
+  a tap in  50% of the frames:  0.00 pipes a game, best game 0
+  a tap in 100% of the frames:  0.00 pipes a game, best game 0
+
+a rule written by a person: tap when the bird is more than N pixels below the middle of the hole
+  N = -10:   2.11 pipes a game,   0 of 100 games without a mistake
+  N =   0:  98.90 pipes a game,  98 of 100 games without a mistake
+  N =  10: 100.00 pipes a game, 100 of 100 games without a mistake
+  N =  20: 100.00 pipes a game, 100 of 100 games without a mistake
+  N =  30: 100.00 pipes a game, 100 of 100 games without a mistake
+  N =  40:   0.90 pipes a game,   0 of 100 games without a mistake
+
+one game with N = 20 has 5000 frames, so 5000 decisions; the player is told "+1" 100 times
+
+=== step2_table.py ===
+always the move with the higher number
+  run 1: pipes after 1,000 … 10,000 games:  18.2  17.5  19.3  19.3  19.3  19.3  19.3  19.9  19.5  19.0 |  0 of 100 games without a mistake |  9.4 million frames
+  run 2: pipes after 1,000 … 10,000 games:  59.4  59.0  59.4  59.4  59.4  59.4  59.4  59.4  59.4  59.4 | 34 of 100 games without a mistake | 28.6 million frames
+  run 3: pipes after 1,000 … 10,000 games:  25.7  23.7  23.7  25.0  25.0  23.6  23.6  23.6  23.8  23.8 |  0 of 100 games without a mistake | 13.1 million frames
+the other move in 3 % of the frames, falling to 0 %
+  run 1: pipes after 1,000 … 10,000 games:   4.1  12.6  59.4  84.0  83.3  86.3  86.3  86.3  83.6  83.6 | 68 of 100 games without a mistake | 18.8 million frames
+  run 2: pipes after 1,000 … 10,000 games:  15.2  30.3  37.2   2.7  84.5  70.3  71.3  74.7  74.9  74.9 | 58 of 100 games without a mistake | 15.7 million frames
+  run 3: pipes after 1,000 … 10,000 games:   1.3   4.2   8.6   9.5   0.2  83.3  85.3  85.3  85.3  85.3 | 72 of 100 games without a mistake | 19.4 million frames
+
+the table has 1900 rows of two numbers; 960 rows were ever corrected
+one column of it (80 to 120 pixels before the end of the pipe, speed 0): expected points for wait / tap
+  bird -120 to  -80 pixels below the middle of the hole:   0.53 /  -0.30  -> wait
+  bird  -80 to  -40 pixels below the middle of the hole:   1.04 /  -0.62  -> wait
+  bird  -40 to    0 pixels below the middle of the hole:   1.96 /   1.40  -> wait
+  bird    0 to   40 pixels below the middle of the hole:   1.20 /   0.38  -> wait
+  bird   40 to   80 pixels below the middle of the hole:   0.00 /   0.07  -> tap
+  bird   80 to  120 pixels below the middle of the hole:   0.00 /   0.00  -> wait
+  bird  120 to  160 pixels below the middle of the hole:   1.00 /  -0.01  -> wait
+
+=== step3_rows.py ===
+the same 10,000 games of learning, with rows of a different size
+  squares of 40 pixels:   1,900 rows,    960 ever corrected,  83.6 pipes a game, 68 of 100 games without a mistake
+  squares of 20 pixels:   7,600 rows,  3,276 ever corrected,  80.9 pipes a game, 64 of 100 games without a mistake
+  squares of 10 pixels:  30,400 rows, 11,217 ever corrected,  58.8 pipes a game, 29 of 100 games without a mistake
+  squares of  5 pixels: 121,600 rows, 21,727 ever corrected,   7.4 pipes a game,  0 of 100 games without a mistake
+
+a picture of 40 by 24 squares with only black or white squares has 2^960 possible pictures
+that is a number with 289 digits; the atoms of the visible universe: a number with about 80 digits
+
+=== step4_network.py ===
+the table: 1,900 rows of two numbers = 3,800 numbers. the network: 4,546 numbers
+
+the plain network (no memory, no copy), six runs of 200,000 frames, checked every 5,000 frames
+  run 0: first check with 90 pipes or more at 45,000 frames; of the 31 checks after it,  8 are below 50 pipes; last check 100.0
+  run 1: first check with 90 pipes or more at  5,000 frames; of the 39 checks after it,  8 are below 50 pipes; last check  98.5
+  run 2: first check with 90 pipes or more at 30,000 frames; of the 34 checks after it,  4 are below 50 pipes; last check 100.0
+  run 3: first check with 90 pipes or more at 30,000 frames; of the 34 checks after it,  9 are below 50 pipes; last check  93.2
+  run 4: first check with 90 pipes or more at 25,000 frames; of the 35 checks after it,  7 are below 50 pipes; last check 100.0
+  run 5: first check with 90 pipes or more at 25,000 frames; of the 35 checks after it,  8 are below 50 pipes; last check  94.7
+the table needed 18,803,197 frames for 83.6 pipes
+
+run 0, check by check (pipes a game):
+    0   0   0   0   4  40  45   0 100   6  99  99 100  97  16 100  97  25 100 100
+   96 100  94 100  22  98 100  89   0  99 100  22  47   1  99  96  99 100 100 100
+
+at 45,000 frames: 100.0 pipes. at 50,000 frames: 6.3 pipes
+between the two, a number of the network moved by 0.0075 on average; its average size is 0.0995
+in the 500,000 situations of the good games the two networks choose the same move 87 % of the time
+
+=== step5_memory_copy.py ===
+our game: pipes a game in the 100 scored games (100 is the most), six runs each
+                       best check all checks last check   runs that reach 90   checks below 50 after reaching 90
+  both                       99.2       60.2       74.1   6 of 6                7.5 a run
+  memory                     99.8       63.4       90.5   6 of 6                7.7 a run
+  copy                       44.2        5.8        0.0   1 of 6               19.0 a run
+  neither                   100.0       71.8       97.7   6 of 6                7.3 a run
+  both, keeps trying        100.0       64.6       90.9   6 of 6                5.0 a run
+  both, step falls           99.9       69.6       61.3   6 of 6                5.2 a run
+  ("keeps trying": 1 % random moves to the end. "step falls": the step size falls to zero by the last frame.)
+
+per run, mean of all 40 checks:
+  both      63.4  51.2  66.2  62.5  51.2  66.6
+  memory    53.2  60.1  73.0  58.3  56.0  79.7
+  copy      30.6   1.6   0.2   0.2   0.0   2.4
+  neither   64.7  79.6  77.8  68.5  72.2  67.7
+
+the paper: five Atari games learned from the picture of the screen, 10 million frames
+                       both   memory     copy  neither
+  Breakout            316.8    240.7     10.2      3.2
+  Enduro             1006.3    831.4    141.9     29.1
+  River Raid         7446.6   4102.8   2867.7   1453.0
+  Seaquest           2894.4    822.6   1003.0    275.8
+  Space Invaders     1088.9    826.3    373.2    302.0
+
+=== step6_picture.py ===
+the picture: 40 by 24 squares, two frames = 1,920 numbers in
+the network: 189,874 dials
+
+pipes a game in the 100 scored games (100 is the most)
+             best check of each run   mean of all checks   last check of each run
+  neither         0.0    0.1    0.3                  0.0        0.0    0.0    0.0
+  copy            0.0    0.0    0.0                  0.0        0.0    0.0    0.0
+  memory         79.7   13.4   33.4                 15.3       39.6   13.4   33.4
+  both           90.8   99.5   95.9                 46.3       42.1   87.7   95.9
+
+the three runs with both ideas, check by check:
+  run 0:   0   0   3   8  10  18  25  23  46  31  54  19  90  47  34  66  52  36  52  42   (rounded down)
+  run 1:   0   0   1   8  48  67  48  48  66  98  75  99  99  94  83  70  43  76  60  87   (rounded down)
+  run 2:   0   0   2   3   8  14  20  19  26  68  89  82  53  73  37  64  90  89  90  95   (rounded down)
+
+on three numbers (step 5) the plain network was the best of the four. On the picture it learns nothing,
+and only the network with both ideas reaches 90 pipes. Its score still falls between checks, so: step 7.
+
+=== step7_best.py ===
+the best network of each plain run, on 1,000 new games (100 pipes is the most)
+  run 0: best copy  99.80 pipes,  996 of 1,000 games without a mistake | last network 100.00 pipes, 1000 of 1,000
+  run 1: best copy 100.00 pipes, 1000 of 1,000 games without a mistake | last network  98.11 pipes,  962 of 1,000
+  run 2: best copy 100.00 pipes, 1000 of 1,000 games without a mistake | last network  99.97 pipes,  998 of 1,000
+  run 3: best copy  99.98 pipes,  998 of 1,000 games without a mistake | last network  93.03 pipes,  865 of 1,000
+  run 4: best copy 100.00 pipes, 1000 of 1,000 games without a mistake | last network  99.29 pipes,  988 of 1,000
+  run 5: best copy 100.00 pipes, 1000 of 1,000 games without a mistake | last network  96.14 pipes,  927 of 1,000
+
+the best copy of run 0, 100 new games that only stop after 1,000 pipes: 1000.0 pipes a game, 100 of 100 games reach 1,000, shortest game 1000 pipes
+
+the same for the picture runs with both ideas (step 6): best copy and last network on the same 1,000 new games
+  run 0: best copy  90.72 pipes,  829 of 1,000 games without a mistake | last network  46.24 pipes,  160 of 1,000
+  run 1: best copy  98.03 pipes,  968 of 1,000 games without a mistake | last network  83.03 pipes,  688 of 1,000
+  run 2: best copy  95.64 pipes,  921 of 1,000 games without a mistake | last network  95.64 pipes,  921 of 1,000
+
+=== tests.py ===
+ok     a bird that never taps hits the ground (after 24 frames)
+ok     a bird that always taps hits the ceiling (after 24 frames)
+ok     the same seed gives the same game 
+ok     a one-line rule plays 100 games without a mistake 
+ok     the learner is told +1 once per pipe and 0 otherwise (5000 frames, 100 rewards)
+ok     many games at once = one game at a time (the rule) (mean 100.0 pipes)
+ok     many games at once = one game at a time (a rule that crashes) (mean 2.0 pipes)
+ok     many games at once = one game at a time (a late rule) (mean 100.0 pipes)
+ok     equal numbers mean wait, a higher number for tap means tap 
+ok     after a crash only the crashing move is corrected, toward -1 (lowest number -0.74)
+ok     trying the other move now and then beats never trying it (19.0 -> 83.6 pipes)
+ok     the saved table scores what its curve says 
+ok     the table plays the same in both kinds of game 
+ok     finer rows learn less in the same 10,000 games (83.6, 58.8, 7.4 pipes)
+ok     the saved best network scores what its curve says (100.0 pipes)
+ok     the network plays the same in both kinds of game 
+ok     the same seed gives the same learning run 
+ok     one picture at a time = many pictures at once (150 frames)
+ok     a picture is 40 by 24 grey levels with a white bird 
+ok     on the picture only the network with both ideas reaches 90 pipes (both: 90.8, 99.5, 95.9)
+ok     in every picture run the score falls by 20 pipes or more between two checks (largest falls: 43, 26, 36)
+ok     the kept copy of picture run 1 scores what its curve says (99.51 pipes)
+ok     in 1,000 new games the kept copy beats the last network (98.0 against 83.0 pipes)
+ok     the exercise game says nothing at a pipe (100 pipes, 5000 frames)
+ok     the exercise game still says -1 at a crash 
+
+ALL TESTS PASS
+
+=== exercise.py ===
+run 0: best check 100.0 pipes, mean of all checks  72.2, first check with 90 or more: 25,000 frames
+run 1: best check 100.0 pipes, mean of all checks  79.9, first check with 90 or more: 25,000 frames
+run 2: best check 100.0 pipes, mean of all checks  55.9, first check with 90 or more: 40,000 frames
+with +1 and -1 (step4_network.py) the six runs reached 90 pipes after 5,000 to 45,000 frames
+Why it can work: the only way to avoid the -1 is to stay in the air, and a bird that stays in the air passes pipes.
+Your turn: give -1 for every tap as well, so that the bird should tap as rarely as it can. What happens to the score?
